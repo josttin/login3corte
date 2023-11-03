@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro e Inicio de Sesión</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+</head>
+<body>
+
+  <div class="container mt-5">
+    <h2 class="mb-4">Registro e Inicio de Sesión</h2>
+
+    <form id="userForm">
+      <div class="mb-3">
+        <label for="username" class="form-label">Usuario:</label>
+        <input type="text" class="form-control" id="username" name="username" required>
+      </div>
+      <div class="mb-3">
+        <label for="password" class="form-label">Contraseña:</label>
+        <input type="password" class="form-control" id="password" name="password" required>
+      </div>
+      <button type="button" class="btn btn-primary" onclick="registrarUsuario()">Registrarse</button>
+      <button type="button" class="btn btn-success" onclick="iniciarSesion()">Iniciar Sesión</button>
+    </form>
+  </div>
+
+  <script>
+      function registrarUsuario() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    if (!username || !password) {
+      alert('Por favor, llene todos los campos');
+      return;
+    }
+
+    fetch('/api/registro', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username,
+        password,
+      }),
+    })
+    .then(response => {
+      if (response.status === 422) {
+        alert('El nombre de usuario ya esta en uso');
+      } else if (!response.ok) {
+        throw new Error(response.statusText);
+      }
+      return response.json();
+    })
+    .then(data => {
+      alert(data.message);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+  }
+
+
+    function iniciarSesion() {
+      const loginUsername = document.getElementById('username').value;
+      const loginPassword = document.getElementById('password').value;
+
+      if (!loginUsername || !loginPassword) {
+        alert('Por favor, llene todos los campos');
+        return;
+      }
+
+      fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: loginUsername,
+          password: loginPassword,
+        }),
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(response.statusText);
+        }
+        return response.json();
+      })
+      .then(data => {
+        alert(data.message);
+      })
+      .catch(error => {
+        if (error.message === 'Not Found') {
+          alert('Usuario no encontrado');
+        } else if (error.message === 'Unauthorized') {
+          alert('Contraseña incorrecta');
+        } else {
+          console.error('Error:', error);
+        }
+      });
+    }
+  </script>
+  
+
+</body>
+</html>
+
+
+
+
